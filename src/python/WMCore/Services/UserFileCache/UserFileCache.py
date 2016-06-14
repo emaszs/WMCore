@@ -143,7 +143,7 @@ class UserFileCache(Service):
 
         #The parameter newchecksum tells the crabcace to use the new algorithm. It's there
         #for guarantee backward compatibility
-        params = [('hashkey', calculateChecksum(fileName, excludeList)), ('newchecksum', '1')]
+        params = [('hashkey', calculateChecksum(fileName, excludeList)), ('newchecksum', '2')]
 
         resString = self["requests"].uploadFile(fileName=fileName, fieldName='inputfile',
                                                 url=self['endpoint'] + 'file',
