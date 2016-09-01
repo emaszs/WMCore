@@ -31,6 +31,7 @@ class PhEDEx(Service):
             dict['endpoint'] = "https://cmsweb.cern.ch/phedex/datasvc/%s/prod/" % self.responseType
 
         dict.setdefault('cacheduration', 0)
+        dict['curl'] = True
         Service.__init__(self, dict)
 
     def _getResult(self, callname, clearCache = False,

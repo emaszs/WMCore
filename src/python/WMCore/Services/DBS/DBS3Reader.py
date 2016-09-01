@@ -47,7 +47,7 @@ class DBS3Reader:
 
 
     """
-    def __init__(self, url, **contact):
+    def __init__(self, url, cfg_dict = None, **contact):
 
         # instantiate dbs api object
         try:
@@ -58,8 +58,8 @@ class DBS3Reader:
             raise DBSReaderError(msg)
 
         # connection to PhEDEx (Use default endpoint url)
-        self.phedex = PhEDEx(responseType = "json")
-        self.siteDB = SiteDB()
+        self.phedex = PhEDEx(cfg_dict, responseType = "json")
+        self.siteDB = SiteDB(cfg_dict)
 
     def _getLumiList(self, blockName = None, lfns = None, validFileOnly = 1):
         """
