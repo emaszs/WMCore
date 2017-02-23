@@ -348,40 +348,40 @@ class RESTDaemon(RESTMain):
                 sys.stdout.write("\n")
 
     def start_daemon(self):
-        """Start the deamon."""
-
-        # Redirect all output to the logging daemon.
-        devnull = file("/dev/null", "w")
-        if isinstance(self.logfile, list):
-            subproc = Popen(self.logfile, stdin=PIPE, stdout=devnull, stderr=devnull,
-                            bufsize=0, close_fds=True, shell=False)
-            logger = subproc.stdin
-        elif isinstance(self.logfile, str):
-            logger = open(self.logfile, "a+", 0)
-        else:
-            raise TypeError("'logfile' must be a string or array")
-        os.dup2(logger.fileno(), sys.stdout.fileno())
-        os.dup2(logger.fileno(), sys.stderr.fileno())
-        os.dup2(devnull.fileno(), sys.stdin.fileno())
-        logger.close()
-        devnull.close()
-
-        # First fork. Discard the parent.
-        pid = os.fork()
-        if pid > 0:
-            os._exit(0)
+#         """Start the deamon."""
+# 
+#         # Redirect all output to the logging daemon.
+#         devnull = file("/dev/null", "w")
+#         if isinstance(self.logfile, list):
+#             subproc = Popen(self.logfile, stdin=PIPE, stdout=devnull, stderr=devnull,
+#                             bufsize=0, close_fds=True, shell=False)
+#             logger = subproc.stdin
+#         elif isinstance(self.logfile, str):
+#             logger = open(self.logfile, "a+", 0)
+#         else:
+#             raise TypeError("'logfile' must be a string or array")
+#         os.dup2(logger.fileno(), sys.stdout.fileno())
+#         os.dup2(logger.fileno(), sys.stderr.fileno())
+#         os.dup2(devnull.fileno(), sys.stdin.fileno())
+#         logger.close()
+#         devnull.close()
+# 
+#         # First fork. Discard the parent.
+#         pid = os.fork()
+#         if pid > 0:
+#             os._exit(0)
 
         # Establish as a daemon, set process group / session id.
         os.chdir(self.statedir)
-        os.setsid()
-
-        # Second fork. The child does the work, discard the second parent.
-        pid = os.fork()
-        if pid > 0:
-            os._exit(0)
-
-        # Save process group id to pid file, then run real worker.
-        file(self.pidfile, "w").write("%d\n" % os.getpgid(0))
+#         os.setsid()
+# 
+#         # Second fork. The child does the work, discard the second parent.
+#         pid = os.fork()
+#         if pid > 0:
+#             os._exit(0)
+# 
+#         # Save process group id to pid file, then run real worker.
+#         file(self.pidfile, "w").write("%d\n" % os.getpgid(0))
 
         error = False
         try:
@@ -408,30 +408,30 @@ class RESTDaemon(RESTMain):
         # it exits abnormally, restarts it, otherwise exits completely with
         # the child's exit code.
         cherrypy.log("WATCHDOG: starting server daemon (pid %d)" % os.getpid())
-        while True:
-            serverpid = os.fork()
-            if not serverpid: break
-            signal(SIGINT, SIG_IGN)
-            signal(SIGTERM, SIG_IGN)
-            signal(SIGQUIT, SIG_IGN)
-            (xpid, exitrc) = os.waitpid(serverpid, 0)
-            (exitcode, exitsigno, exitcore) = (exitrc >> 8, exitrc & 127, exitrc & 128)
-            retval = (exitsigno and ("signal %d" % exitsigno)) or str(exitcode)
-            retmsg = retval + ((exitcore and " (core dumped)") or "")
-            restart = (exitsigno > 0 and exitsigno not in (2, 3, 15))
-            cherrypy.log("WATCHDOG: server exited with exit code %s%s"
-                         % (retmsg, (restart and "... restarting") or ""))
-
-            if not restart:
-                sys.exit((exitsigno and 1) or exitcode)
-
-            for pidfile in glob("%s/*/pid" % self.statedir):
-                if os.path.exists(pidfile):
-                    pid = int(open(pidfile).readline())
-                    os.remove(pidfile)
-                    cherrypy.log("WATCHDOG: killing slave server %d" % pid)
-                    try: os.kill(pid, 9)
-                    except: pass
+#         while True:
+#             serverpid = os.fork()
+#             if not serverpid: break
+#             signal(SIGINT, SIG_IGN)
+#             signal(SIGTERM, SIG_IGN)
+#             signal(SIGQUIT, SIG_IGN)
+#             (xpid, exitrc) = os.waitpid(serverpid, 0)
+#             (exitcode, exitsigno, exitcore) = (exitrc >> 8, exitrc & 127, exitrc & 128)
+#             retval = (exitsigno and ("signal %d" % exitsigno)) or str(exitcode)
+#             retmsg = retval + ((exitcore and " (core dumped)") or "")
+#             restart = (exitsigno > 0 and exitsigno not in (2, 3, 15))
+#             cherrypy.log("WATCHDOG: server exited with exit code %s%s"
+#                          % (retmsg, (restart and "... restarting") or ""))
+# 
+#             if not restart:
+#                 sys.exit((exitsigno and 1) or exitcode)
+# 
+#             for pidfile in glob("%s/*/pid" % self.statedir):
+#                 if os.path.exists(pidfile):
+#                     pid = int(open(pidfile).readline())
+#                     os.remove(pidfile)
+#                     cherrypy.log("WATCHDOG: killing slave server %d" % pid)
+#                     try: os.kill(pid, 9)
+#                     except: pass
 
         # Run. Override signal handlers after CherryPy has itself started and
         # installed its own handlers. To achieve this we need to start the
