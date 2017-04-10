@@ -178,6 +178,8 @@ class FileBased(JobFactory):
                         filesInJob = 0
                         jobsInGroup += 1
                         jobRun = fileRun
+                    for lumi in iter(f['runs']).next().lumis:
+                        self.currentJob['mask'].addRunAndLumis(run = iter(f['runs']).next().run, lumis = [lumi])
                     self.currentJob.addFile(f)
                     filesInJob += 1
                     fileTime = f['events'] * timePerEvent
